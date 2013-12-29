@@ -34,8 +34,13 @@ char dateBuffer[] = "14 Aug";
 void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
     //Here we will update the watchface display
-    
+    if(clock_is_24h_style()){
+      strftime(timeBuffer, sizeof(timeBuffer), "%H:%M", tick_time);
+    }
+
+    else{
     strftime(timeBuffer,sizeof(timeBuffer),"   %I:%M   ",tick_time);
+    }
     strftime(dateBuffer, sizeof(dateBuffer), "%e %b", tick_time);
     text_layer_set_text(text_layer,timeBuffer);
     text_layer_set_text(date_text_layer, dateBuffer);
