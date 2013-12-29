@@ -1,0 +1,49 @@
+{
+  "uuid": "f7522e47-89c0-441b-8a0f-f58fb8596974",
+  "shortName": "trek",
+  "longName": "trek",
+  "companyName": "MakeAwesomeHappen",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": [
+      
+            {
+                "type":"png",
+                "name":"starfleet_insignia",
+                "file":"images/starfleet_insignia.png"
+            },
+            
+            {
+                "type":"font",
+                "name":"trekfont_30",
+                "file":"fonts/trek.ttf"
+            
+            },
+
+
+            {
+                "type":"font",
+                "name":"trekfont_20",
+                "file":"fonts/trek.ttf"
+            
+            },
+
+
+            {
+                "menuIcon":true,
+                "type":"png",
+                "name":"IMAGE_MENU_ICON",
+                "file":"images/IMAGE_MENU_ICON.png"
+            }
+
+      
+            ]
+  }
+}
