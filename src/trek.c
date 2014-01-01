@@ -8,8 +8,8 @@ static TextLayer* battery_text_layer;
 static TextLayer* date_text_layer;
 static GBitmap *insig_bitmap;
 static BitmapLayer* insig_layer;
-char timeBuffer[] = "   00:00   ";
-char dateBuffer[] = "14 Aug";
+static GFont trek30;
+static GFont trek20;
 
 
 
@@ -33,6 +33,10 @@ char dateBuffer[] = "14 Aug";
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 {
+
+    static char dateBuffer[] = "14 Aug";
+    static char timeBuffer[] = "   00:00   ";
+
     //Here we will update the watchface display
     if(clock_is_24h_style()){
       strftime(timeBuffer, sizeof(timeBuffer), "%H:%M", tick_time);
@@ -53,7 +57,9 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed)
 
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
+
+  trek30 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_trekfont_30));
+  trek20 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_trekfont_20));
 
 
   /* Set up insig background */
@@ -66,7 +72,7 @@ static void window_load(Window *window) {
   
   /* set up text layer */
   text_layer = text_layer_create(GRect(0,138,144,50));
-  text_layer_set_font(text_layer,fonts_load_custom_font(resource_get_handle(RESOURCE_ID_trekfont_30)));
+  text_layer_set_font(text_layer,trek30);
   text_layer_set_background_color(text_layer, GColorBlack);
   text_layer_set_text_color(text_layer, GColorWhite);
   text_layer_set_text(text_layer, "Press a button");
@@ -76,7 +82,7 @@ static void window_load(Window *window) {
   
   // set up date text layer
   date_text_layer = text_layer_create(GRect(120,0,40,40));
-  text_layer_set_font(date_text_layer,fonts_load_custom_font(resource_get_handle(RESOURCE_ID_trekfont_20)));
+  text_layer_set_font(date_text_layer,trek20);
   text_layer_set_background_color(date_text_layer, GColorBlack);
   text_layer_set_text_color(date_text_layer, GColorWhite);
   layer_add_child(window_layer, text_layer_get_layer(date_text_layer));
@@ -84,7 +90,7 @@ static void window_load(Window *window) {
 
   //set up battery text layer
   battery_text_layer = text_layer_create(GRect(0,0,40,40));
-  text_layer_set_font(battery_text_layer,fonts_load_custom_font(resource_get_handle(RESOURCE_ID_trekfont_20)));
+  text_layer_set_font(battery_text_layer,trek20);
   text_layer_set_background_color(battery_text_layer, GColorBlack);
   text_layer_set_text_color(battery_text_layer, GColorWhite);
   layer_add_child(window_layer, text_layer_get_layer(battery_text_layer));
@@ -107,6 +113,10 @@ struct tm *t;
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
   text_layer_destroy(battery_text_layer);
+  text_layer_destroy(date_text_layer);
+  fonts_unload_custom_font(trek30);
+  fonts_unload_custom_font(trek20);
+
 }
 
 static void init(void) {
