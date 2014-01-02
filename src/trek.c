@@ -6,8 +6,11 @@ static Window *window;
 static TextLayer *text_layer;
 static TextLayer* battery_text_layer;
 static TextLayer* date_text_layer;
+static TextLayer* temp_text_layer;
 static GBitmap *insig_bitmap;
 static BitmapLayer* insig_layer;
+static GBitmap* bt_connected;
+static BitmapLayer* bt_connected_layer;
 static GFont trek30;
 static GFont trek20;
 
@@ -41,6 +44,7 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
       // App Sync keeps new_tuple in sync_buffer, so we may use it directly
       //text_layer_set_text(temperature_layer, new_tuple->value->cstring);
       APP_LOG(APP_LOG_LEVEL_DEBUG, "temp = %s", new_tuple->value->cstring);
+      text_layer_set_text(temp_text_layer,new_tuple->value->cstring);
       break;
     /*
     case WEATHER_CITY_KEY:
@@ -68,10 +72,18 @@ static void send_cmd(void) {
 }
 
 
+void handle_bt(bool connected){
+  if(connected == 1){
+  bt_connected = gbitmap_create_with_resource(RESOURCE_ID_bt_connected);
+  bitmap_layer_set_bitmap(bt_connected_layer,bt_connected);
+  }
 
+  else{
+  bt_connected = gbitmap_create_with_resource(RESOURCE_ID_bt_disconnected);
+  bitmap_layer_set_bitmap(bt_connected_layer,bt_connected);
+  }
 
-
-
+}
 
  void handle_battery(BatteryChargeState charge_state) {
   static char battery_text[] = "100%";
@@ -124,6 +136,8 @@ static void window_load(Window *window) {
   bitmap_layer_set_background_color(insig_layer,GColorBlack);
   bitmap_layer_set_bitmap(insig_layer,insig_bitmap);
   layer_add_child(window_layer,bitmap_layer_get_layer(insig_layer));
+
+
   
   
   /* set up text layer */
@@ -151,8 +165,19 @@ static void window_load(Window *window) {
   text_layer_set_text_color(battery_text_layer, GColorWhite);
   layer_add_child(window_layer, text_layer_get_layer(battery_text_layer));
 
+  //set up temp text layer
+  temp_text_layer = text_layer_create(GRect(0,144,40,40));
+  text_layer_set_font(temp_text_layer,trek20);
+  text_layer_set_background_color(temp_text_layer, GColorBlack);
+  text_layer_set_text_color(temp_text_layer, GColorWhite);
+  text_layer_set_text(temp_text_layer, "-100'");
+  layer_add_child(window_layer, text_layer_get_layer(temp_text_layer));
 
 
+  bt_connected = gbitmap_create_with_resource(RESOURCE_ID_bt_disconnected);
+  bt_connected_layer = bitmap_layer_create(GRect(115,135,40,40));
+  bitmap_layer_set_background_color(bt_connected_layer,GColorBlack);
+  layer_add_child(window_layer,bitmap_layer_get_layer(bt_connected_layer));
 
 // create a time object to init time when window loaded
 struct tm *t;
@@ -164,6 +189,10 @@ struct tm *t;
 //get battery charge when window loaded
  BatteryChargeState btchg = battery_state_service_peek();
  handle_battery(btchg);
+
+
+ bool connected = bluetooth_connection_service_peek();
+ handle_bt(connected);
 
 
  Tuplet initial_values[] = {
@@ -185,6 +214,7 @@ static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
   text_layer_destroy(battery_text_layer);
   text_layer_destroy(date_text_layer);
+  text_layer_destroy(temp_text_layer);
   fonts_unload_custom_font(trek30);
   fonts_unload_custom_font(trek20);
 
@@ -194,6 +224,7 @@ static void init(void) {
   window = window_create();
   tick_timer_service_subscribe(MINUTE_UNIT, (TickHandler) tick_handler); 
   battery_state_service_subscribe(&handle_battery);
+  bluetooth_connection_service_subscribe(&handle_bt);
   window_set_background_color(window,GColorBlack);
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
@@ -210,8 +241,12 @@ static void init(void) {
 
 static void deinit(void) {
   gbitmap_destroy(insig_bitmap);
+  gbitmap_destroy(bt_connected);
   bitmap_layer_destroy(insig_layer);
+  bitmap_layer_destroy(bt_connected_layer);
   tick_timer_service_unsubscribe();
+  battery_state_service_unsubscribe();
+  bluetooth_connection_service_unsubscribe();
   window_destroy(window);
 }
 

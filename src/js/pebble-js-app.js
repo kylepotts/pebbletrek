@@ -19,20 +19,19 @@ function fetchWeather(latitude, longitude) {
   req.onload = function(e) {
     if (req.readyState == 4) {
       if(req.status == 200) {
-        console.log(req.responseText);
+        //console.log(req.responseText);
         response = JSON.parse(req.responseText);
         var temperature, icon, city;
         if (response && response.list && response.list.length > 0) {
           var weatherResult = response.list[0];
           temperature = Math.round(weatherResult.main.temp - 273.15);
-          city = weatherResult.name;
-          console.log(temperature);
-          Pebble.sendAppMessage({"temperature":temperature},
+          temperature = Math.round(temperature*1.8+32)
+          Pebble.sendAppMessage({"temperature":""+temperature+"'"},
              function(e) {
-                console.log("Successfully delivered message with transactionId="+ e.data.transactionId);
+              //  console.log("Successfully delivered message with transactionId="+ e.data.transactionId);
                 },
               function(e) {
-                console.log("Unable to deliver message with transactionId="+ e.data.transactionId+ " Error is: " + e.error.message);
+               // console.log("Unable to deliver message with transactionId="+ e.data.transactionId+ " Error is: " + e.error.message);
                 }
             );
         }
@@ -58,7 +57,7 @@ function locationError(err) {
   });
 }
 
-var locationOptions = { "timeout": 15000, "maximumAge": 60000 }; 
+var locationOptions = { "timeout": 30000, "maximumAge": 60000 }; 
 
 
 Pebble.addEventListener("ready",
