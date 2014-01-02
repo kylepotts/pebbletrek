@@ -21,6 +21,12 @@ enum WeatherKey {
   WEATHER_CITY_KEY = 0x2,         // TUPLE_CSTRING
 };
 
+static const uint32_t WEATHER_ICONS[] = {
+  RESOURCE_ID_IMAGE_SUN, //0
+  RESOURCE_ID_IMAGE_CLOUD, //1
+  RESOURCE_ID_IMAGE_RAIN, //2
+  RESOURCE_ID_IMAGE_SNOW //3
+};
 
 static void sync_error_callback(DictionaryResult dict_error, AppMessageResult app_message_error, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Sync Error: %d", app_message_error);
@@ -28,7 +34,6 @@ static void sync_error_callback(DictionaryResult dict_error, AppMessageResult ap
 
 static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tuple, const Tuple* old_tuple, void* context) {
   switch (key) {
-    /*
     case WEATHER_ICON_KEY:
       if (icon_bitmap) {
         gbitmap_destroy(icon_bitmap);
@@ -36,17 +41,15 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
       icon_bitmap = gbitmap_create_with_resource(WEATHER_ICONS[new_tuple->value->uint8]);
       bitmap_layer_set_bitmap(icon_layer, icon_bitmap);
       break;
-    */
+
     case WEATHER_TEMPERATURE_KEY:
       // App Sync keeps new_tuple in sync_buffer, so we may use it directly
-      //text_layer_set_text(temperature_layer, new_tuple->value->cstring);
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "temp = %s", new_tuple->value->cstring);
+      text_layer_set_text(temperature_layer, new_tuple->value->cstring);
       break;
-    /*
+
     case WEATHER_CITY_KEY:
       text_layer_set_text(city_layer, new_tuple->value->cstring);
       break;
-      */
   }
 }
 
@@ -168,7 +171,7 @@ struct tm *t;
 
  Tuplet initial_values[] = {
     TupletInteger(WEATHER_ICON_KEY, (uint8_t) 1),
-    TupletCString(WEATHER_TEMPERATURE_KEY, "1234"),
+    TupletCString(WEATHER_TEMPERATURE_KEY, "1234\u00B0C"),
     TupletCString(WEATHER_CITY_KEY, "St Pebblesburg"),
   };
 
@@ -201,9 +204,6 @@ static void init(void) {
   });
 
 
-  const int inbound_size = 64;
-  const int outbound_size = 64;
-  app_message_open(inbound_size, outbound_size);
   const bool animated = true;
   window_stack_push(window, animated);
 }

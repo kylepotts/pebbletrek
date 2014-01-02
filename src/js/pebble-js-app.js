@@ -1,3 +1,4 @@
+
 function iconFromWeatherId(weatherId) {
   if (weatherId < 600) {
     return 2;
@@ -24,15 +25,16 @@ function fetchWeather(latitude, longitude) {
         if (response && response.list && response.list.length > 0) {
           var weatherResult = response.list[0];
           temperature = Math.round(weatherResult.main.temp - 273.15);
-          icon = iconFromWeatherId(weatherResult.weather[0].id);
           city = weatherResult.name;
           console.log(temperature);
-          console.log(icon);
-          console.log(city);
-          Pebble.sendAppMessage({
-            "icon":icon,
-            "temperature":temperature,
-            "city":city});
+          Pebble.sendAppMessage({"temperature":temperature},
+             function(e) {
+                console.log("Successfully delivered message with transactionId="+ e.data.transactionId);
+                },
+              function(e) {
+                console.log("Unable to deliver message with transactionId="+ e.data.transactionId+ " Error is: " + e.error.message);
+                }
+            );
         }
 
       } else {
@@ -80,4 +82,5 @@ Pebble.addEventListener("webviewclosed",
                                      console.log(e.type);
                                      console.log(e.response);
                                      });
+
 
